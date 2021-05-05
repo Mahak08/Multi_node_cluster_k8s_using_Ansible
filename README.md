@@ -1,5 +1,12 @@
 # Multi_node_cluster_k8s_using_Ansible
-Three roles 
+Roles on Ansible Galaxy can be download by following commands
+1)ansible-galaxy install mahak08.k8s_master
+
+2)ansible-galaxy install mahak08.k8s_slave
+
+3)ansible-galaxy install mahak08.provision_aws_ec2_instance
+
+Description of Three roles 
 1) aws_instance : It will launch ec2-instance on top of cloud 
 
 Before running the playbook remember to add IAM Credential
