@@ -1,0 +1,55 @@
+    - name: "Installing python" 
+      package:
+         name: python3
+         state: present
+
+    - name: "Installing aws cli requirement"         
+      pip:        
+         name:
+          - "boto"
+          - "boto3"
+          - "botocore"
+         state: present
+    
+    - name: "Launching ec2 instance"
+      ec2:
+         region: "{{ region }}"
+         key_name: "{{ key_name }}" 
+         image: "{{ image }}"
+         instance_type: "{{ instance_type }}"
+         instance_tags:
+             Name: "{{ item }}"
+         count: 1
+         group: "{{ security_group }}"
+         vpc_subnet_id: "{{ vpc_subnet_id }}"
+         assign_public_ip: yes
+         state: present
+      loop: "{{instance_tags}}"
+      register: ec2
+
+    - ec2_instance_info:
+           instance_ids:
+             - "{{ec2.results[item]['instance_ids'][0]}}"
+      loop: "{{ range(0,3) }}"
+      register: ip
+   
+    - debug:
+         var:  ip.results[item].instances[0]['public_ip_address'] 
+      loop: "{{range(0,3)}}" 
+      
+    - name: Update  Master IP ininventory
+      lineinfile:
+         path: "{{path}}"
+         insertafter: "\\[master\\]"
+         line: "{{ip.results[item].instances[0]['public_ip_address']}} ansible_ssh_user=ec2-user"
+      when: ip.results[item].instances[0]["tags"]["Name"] == "k8s_Master" 
+      loop: "{{range(0,3)}}"  
+
+    - name: Update Slave IP in  inventory
+      lineinfile:
+         path: "{{path}}"
+         insertafter: "\\[slave\\]"
+         line: "{{ip.results[item].instances[0]['public_ip_address']}} ansible_ssh_user=ec2-user"
+      when: ip.results[item].instances[0]["tags"]["Name"] != "k8s_Master" 
+      loop: "{{range(0,3)}}"  
+

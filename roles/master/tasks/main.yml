@@ -1,0 +1,96 @@
+---
+   - name: update yum_repository for k8s-cluster
+     yum_repository:
+       name: Kubernetes
+       description: Kubernetes repo
+       baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+       enabled: 1
+       gpgcheck: 1
+       repo_gpgcheck: 1
+       gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+       exclude: kubelet kubeadm kubectl
+     register: a    
+
+   - name: Install docker
+     package:
+       name: "docker"
+       state: present
+       skip_broken: yes
+
+   - name: Start docker service
+     service:
+       name: docker
+       state: started
+       enabled: yes
+ 
+   - name: Install kubectl , kubeadm , kubelet
+     yum:
+       name:
+         - kubelet 
+         - kubeadm
+         - kubectl
+       state: present
+       disable_excludes: Kubernetes  
+
+   - name: Enable kubelet Service
+     service:
+       name: kubelet
+       state: started
+       enabled: yes
+
+   - name: Pull config image
+     command: "kubeadm config images pull"
+
+   - name: Change Cgroup Driver to Systemd 
+     copy:
+       dest: "/etc/docker/daemon.json"
+       content: |
+        {
+         "exec-opts":["native.cgroupdriver=systemd"]  
+        }  
+   
+   - name: restart docker
+     service: 
+       name: docker
+       state: restarted
+   
+   - name: Install iproute-tc
+     yum:
+       name: iproute-tc
+       state: present
+
+   - name: Initialize Cluster Networking using Kubeadm
+     command: " kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem"
+  
+   - name: Creating .kube Directory
+     shell: "sudo mkdir -p $HOME/.kube"
+
+   - name: Copy config file to k8s-Master home location
+     command: "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+
+   - name: Change the owership of config file for clients
+     shell: "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+
+   - name: apply flannel app
+     shell: "kubectl apply  -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+
+   - name: Creating token
+     shell: "kubeadm token create --print-join-command"
+     register: token
+     ignore_errors: yes
+   
+   - name: debugging token
+     debug:
+       var: token.stdout_lines
+  
+  # - name: File to save token in controller system
+  #   file:
+  #     path: "{{path}}"
+  #      state: touch
+  #   delegate_to: 127.0.0.1
+
+  # - name: Saving token in file
+  #   lineinfile:
+  #     path: "{{path}}"
+  #     line: "tokens: {{token.stdout_lines[0]}}"
+  #   delegate_to: 127.0.0.1

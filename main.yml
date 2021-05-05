@@ -1,0 +1,4 @@
+ - name: launch ec2 instance 
+   hosts: localhost
+   roles:
+       - role: "aws-instance" 

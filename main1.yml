@@ -1,0 +1,9 @@
+ - name: Configure Master node
+   hosts: master
+   roles:
+       - role: "master"
+
+ - name: COnfigure Slave nodes      
+   hosts: slave
+   roles:
+       - role: "slave"

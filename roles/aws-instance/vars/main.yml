@@ -1,0 +1,14 @@
+---
+# vars file for aws-instance
+# 
+    image: ami-0bcf5425cdc1d8a85
+    key_name: ansible 
+    instance_type: t2.micro
+    instance_tags: 
+       - "k8s_Master"
+       - "k8s_Slave1"
+       - "k8s_Slave2"
+    region: ap-south-1
+    vpc_subnet_id: subnet-e97b7281
+    security_group: default
+    path: /playbook/task19/inventory
