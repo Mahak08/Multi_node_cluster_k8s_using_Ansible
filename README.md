@@ -13,7 +13,7 @@ Before running the playbook remember to add IAM Credential
     > give region (eg. ap-south-1)
     
 ->In the vars file give instance ID , key_name , instance_type , instance_tags , region , vpc_subnet_id ,security_group , path: inventory_path   
-->According to playbook the IP of the instances launch is automatically updated in the inventory for further use. 
+->According to playbook the IP of the instances launch is DYNAMICALLY updated in the inventory for further use. 
 
 2) Master role: Configure the master host and generate token so slave can get connected.
  
