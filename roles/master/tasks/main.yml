@@ -83,14 +83,4 @@
      debug:
        var: token.stdout_lines
   
-  # - name: File to save token in controller system
-  #   file:
-  #     path: "{{path}}"
-  #      state: touch
-  #   delegate_to: 127.0.0.1
 
-  # - name: Saving token in file
-  #   lineinfile:
-  #     path: "{{path}}"
-  #     line: "tokens: {{token.stdout_lines[0]}}"
-  #   delegate_to: 127.0.0.1
