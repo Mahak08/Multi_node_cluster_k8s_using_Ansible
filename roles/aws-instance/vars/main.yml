@@ -11,4 +11,4 @@
     region: ap-south-1
     vpc_subnet_id: subnet-e97b7281
     security_group: default
-    path: /playbook/task19/inventory
+    path: #inventory_path
